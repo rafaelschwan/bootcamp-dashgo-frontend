@@ -1,14 +1,16 @@
 import { Box, Flex, Heading, Button, Icon, Table, Thead, Tr, Th, Checkbox, Tbody, Td, Text, useBreakpointValue, Spinner } from "@chakra-ui/react";
 import { RiAddLine, RiPencilLine } from "react-icons/ri";
-
 import { Header } from "../../components/Header";
 import { Pagination } from "../../components/Pagination";
 import { Sidebar } from "../../components/Sidebar";
 import Link from 'next/link';
-import { useUsers } from "../../services/hooks/useUsers";
+import { getUsers, useUsers } from "../../services/hooks/useUsers";
+import { useState } from "react";
+import { GetServerSideProps } from "next";
 
-export default function UserList() {
-  const { data , isLoading, isFetching, error } = useUsers(); 
+export default function UserList(/*{ users }*/) {
+  const [page, setPage] = useState(1);
+  const { data , isLoading, isFetching, error } = useUsers(page, /* { initialData: users, } */);
 
   const isWideVersion = useBreakpointValue({
     base: false,
@@ -17,7 +19,7 @@ export default function UserList() {
 
   return (
     <Box>
-      <Header />
+      <Header /> 
       <Flex
         w='100%'
         my='6'
@@ -74,7 +76,7 @@ export default function UserList() {
                   </Tr>
                 </Thead>
                 <Tbody> 
-                  {data.map(user => {
+                  {data.users.map(user => {
                     return (
                     <Tr key={user.id}>
                       <Td px={['4', '4', '6']}>
@@ -102,7 +104,11 @@ export default function UserList() {
                   })}                  
                 </Tbody>
               </Table>
-              <Pagination />
+              <Pagination
+                totalCountOfRegisters={data.totalCount}
+                currentPage={page}
+                onPageChange={setPage}
+              />
             </>
           )} 
         </Box>
@@ -110,3 +116,16 @@ export default function UserList() {
     </Box>
   );
 }
+
+/*
+exemplo ssr
+export const getServerSideProps: GetServerSideProps = async () => {
+  const users = await getUsers(1)
+
+  return {
+    props: {
+      users
+    }
+  }
+}
+*/
